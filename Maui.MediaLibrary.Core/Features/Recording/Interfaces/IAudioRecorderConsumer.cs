@@ -11,6 +11,8 @@ public interface IAudioRecorderConsumer
     /// <returns>A task representing the asynchronous operation.</returns>
     Task AudioChunkReceived(AudioChunk chunk);
 
+    void RecordingStarted();
+
     /// <summary>
     /// Called when the recording is stopped.
     /// </summary>

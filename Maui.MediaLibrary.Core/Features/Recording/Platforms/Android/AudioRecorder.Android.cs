@@ -3,7 +3,7 @@ using Maui.MediaLibrary.Core.Features.Recording.Interfaces;
 using Maui.MediaLibrary.Core.Features.Recording.Models;
 
 
-namespace Maui.MediaLibrary.Core.Features.Recording.Platforms;
+namespace Maui.MediaLibrary.Core.Features.Recording.Platforms.Android;
 
 internal class AudioRecorder : IAudioRecorder
 {

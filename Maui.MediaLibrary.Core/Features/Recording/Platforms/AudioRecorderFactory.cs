@@ -1,4 +1,7 @@
 ﻿using Maui.MediaLibrary.Core.Features.Recording.Interfaces;
+#if ANDROID
+using Maui.MediaLibrary.Core.Features.Recording.Platforms.Android;
+#endif
 
 namespace Maui.MediaLibrary.Core.Features.Recording.Platforms;
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Maui.MediaLibrary.Features.Tests;
+using Microsoft.Extensions.Logging;
 
 namespace Maui.MediaLibrary
 {
@@ -18,6 +19,9 @@ namespace Maui.MediaLibrary
 #if DEBUG
     		builder.Logging.AddDebug();
 #endif
+
+            builder.Services.AddTransient<AudioRecorderViewModel>();
+            builder.Services.AddTransient<AudioRecorderPage>();            
 
             return builder.Build();
         }

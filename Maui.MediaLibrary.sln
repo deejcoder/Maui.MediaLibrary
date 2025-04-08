@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35913.81 d17.13
+VisualStudioVersion = 17.13.35913.81
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Maui.MediaLibrary", "Maui.MediaLibrary\Maui.MediaLibrary.csproj", "{CBCA7C8E-ED0A-4DB6-B85B-DFD12100037C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Maui.MediaLibrary.Core", "Maui.MediaLibrary.Core\Maui.MediaLibrary.Core.csproj", "{8888B48A-1296-4F48-8A3C-693F55387A30}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{CBCA7C8E-ED0A-4DB6-B85B-DFD12100037C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CBCA7C8E-ED0A-4DB6-B85B-DFD12100037C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CBCA7C8E-ED0A-4DB6-B85B-DFD12100037C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8888B48A-1296-4F48-8A3C-693F55387A30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8888B48A-1296-4F48-8A3C-693F55387A30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8888B48A-1296-4F48-8A3C-693F55387A30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8888B48A-1296-4F48-8A3C-693F55387A30}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

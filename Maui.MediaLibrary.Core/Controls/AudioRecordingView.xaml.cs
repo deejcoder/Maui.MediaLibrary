@@ -5,18 +5,26 @@ namespace Maui.MediaLibrary.Core.Controls;
 
 public partial class AudioRecordingView : ContentView, IAudioRecordingView
 {
-    private readonly IAudioRecorder Recorder;
+    private IAudioRecorder? Recorder { get; set; }
     private CancellationTokenSource? RecorderCancellationTokenSource { get; set; }
 
     public static readonly BindableProperty ConsumerProperty =
-        BindableProperty.Create(nameof(Consumer), typeof(IAudioRecorderConsumer), typeof(AudioRecordingView), null);
+        BindableProperty.Create(nameof(Consumer), typeof(IAudioRecorderConsumer), typeof(AudioRecordingView), null, propertyChanged: ConsumerPropertyChanged);
     
     public IAudioRecorderConsumer Consumer
     {
         get => (IAudioRecorderConsumer)GetValue(ConsumerProperty);
         set => SetValue(ConsumerProperty, value);
     }
-    
+
+    private static void ConsumerPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+    {
+        var view = (AudioRecordingView)bindable;
+        if (oldValue == newValue) return;
+
+        view.SetupRecorder();
+    }
+
     public static readonly BindableProperty IsRecordingProperty =
         BindableProperty.Create(nameof(IsRecording), typeof(bool), typeof(AudioRecordingView), false, propertyChanged: IsRecordingPropertyChanged);
     
@@ -36,7 +44,8 @@ public partial class AudioRecordingView : ContentView, IAudioRecordingView
         {
             if (isRecording)
             {
-                view.StartRecording();
+                // TODO: handle this better
+                view.Dispatcher.DispatchAsync(async () => await view.StartRecording());
             }
             else
             {
@@ -57,20 +66,25 @@ public partial class AudioRecordingView : ContentView, IAudioRecordingView
     
     public AudioRecordingView()
 	{
-		InitializeComponent();
-
-        this.Recorder = AudioRecorderFactory.Create();
+		InitializeComponent();        
 	}
+
+    private void SetupRecorder()
+    {
+        this.Recorder = AudioRecorderFactory.Create(Consumer);
+    }
 
     private async Task StartRecording()
     {
-        if (Consumer != null)
+        if (Recorder != null)
         {
-            // TODO: deal with thread safety
+            // Request microphone permission
             await RequestPermission();
 
+            // Set a timeout for when the recording should stop
             RecorderCancellationTokenSource = new(Timeout);
-            Recorder.StartRecording(Consumer, RecorderCancellationTokenSource.Token);
+            
+            Recorder.StartRecording(RecorderCancellationTokenSource.Token);
             IsRecording = true;
         }
     }
@@ -93,7 +107,7 @@ public partial class AudioRecordingView : ContentView, IAudioRecordingView
 
     private void StopRecording()
     {
-        if (Consumer != null)
+        if (Recorder != null)
         {
             Recorder.StopRecording();
             IsRecording = false;

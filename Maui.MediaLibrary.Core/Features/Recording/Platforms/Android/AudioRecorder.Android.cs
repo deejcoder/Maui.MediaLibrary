@@ -14,17 +14,16 @@ internal class AudioRecorder : IAudioRecorder
 
     public bool IsRecording { get; private set; }
 
-    public AudioRecorder()
-    {
-        BufferSize = AudioRecord.GetMinBufferSize(16000, ChannelIn.Mono, Encoding.Pcm16bit);
-        Buffer = new byte[BufferSize];
-
-    }
-
-    public void StartRecording(IAudioRecorderConsumer consumer, CancellationToken? cancellationToken = null)
+    public AudioRecorder(IAudioRecorderConsumer consumer)
     {
         this.Consumer = new WeakReference<IAudioRecorderConsumer>(consumer);
 
+        BufferSize = AudioRecord.GetMinBufferSize(16000, ChannelIn.Mono, Encoding.Pcm16bit);
+        Buffer = new byte[BufferSize];
+    }
+
+    public void StartRecording(CancellationToken? cancellationToken = null)
+    {        
         cancellationToken ??= CancellationToken.None;
 
         AudioRecord = new AudioRecord(

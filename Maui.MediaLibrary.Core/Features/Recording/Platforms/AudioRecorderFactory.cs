@@ -7,10 +7,16 @@ namespace Maui.MediaLibrary.Core.Features.Recording.Platforms;
 
 public class AudioRecorderFactory
 {
-    public static IAudioRecorder Create()
+    public static IAudioRecorder Create(IAudioRecorderConsumer consumer)
     {
 #if ANDROID
-        return new AudioRecorder();
+        switch(consumer)
+        {
+            case IAudioSpeechRecorderConsumer speechConsumer:
+                return new AudioSpeechRecognizer(speechConsumer);                            
+            default:
+                return new AudioRecorder(consumer);
+        }        
 #else
         throw new NotSupportedException("Audio recording is not supported on this platform.");
 #endif

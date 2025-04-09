@@ -5,7 +5,7 @@ using Maui.MediaLibrary.Core.Features.Recording.Models;
 
 namespace Maui.MediaLibrary.Features.Tests
 {
-    public partial class AudioRecorderViewModel : ObservableObject, IAudioRecorderConsumer
+    public partial class AudioRecorderViewModel : ObservableObject, IAudioSpeechRecorderConsumer
     {
         [ObservableProperty]
         public partial bool IsRecording { get; set; }
@@ -26,8 +26,24 @@ namespace Maui.MediaLibrary.Features.Tests
         }
 
         public void RecordingStopped()
+        {            
+        }
+
+        public Task SpeechRecognitionResultsReceived(SpeechRecognitionResult results)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
+        }
+
+        public void SpeechRecognitionReady()
+        {            
+        }
+
+        public void SpeechRecognitionError()
+        {            
+        }
+
+        public void RecordingStarted()
+        {            
         }
     }
 }

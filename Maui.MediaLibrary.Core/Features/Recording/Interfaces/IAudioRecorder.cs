@@ -2,6 +2,6 @@
 
 public interface IAudioRecorder
 {
-    void StartRecording(IAudioRecorderConsumer consumer, CancellationToken? cancellationToken = null);
+    void StartRecording(CancellationToken? cancellationToken = null);
     void StopRecording();
 }

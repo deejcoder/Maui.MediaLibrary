@@ -1,36 +1,65 @@
-﻿using Android.Speech;
+﻿using Android.Content;
+using Android.Speech;
 using Maui.MediaLibrary.Core.Features.Recording.Interfaces;
 
 namespace Maui.MediaLibrary.Core.Features.Recording.Platforms.Android
 {
     public class AudioSpeechRecognizer : IAudioRecorder
     {
-        private WeakReference<IAudioRecorderConsumer>? Consumer { get; set; }
+        private WeakReference<IAudioSpeechRecorderConsumer>? WeakConsumer { get; set; }
+        private SpeechRecognizer? Recognizer { get; set; }
 
-        public AudioSpeechRecognizer()
+        public AudioSpeechRecognizer(IAudioSpeechRecorderConsumer consumer)
         {
-
+            this.WeakConsumer = new WeakReference<IAudioSpeechRecorderConsumer>(consumer);
         }
 
-        public void StartRecording(IAudioRecorderConsumer consumer, CancellationToken? cancellationToken = null)
+        public void StartRecording(CancellationToken? cancellationToken = null)
         {
-            this.Consumer = new WeakReference<IAudioRecorderConsumer>(consumer);
+            if (Platform.CurrentActivity == null)
+            {
+                throw new InvalidOperationException("Current activity is null.");
+            }
 
-            // TODO: finish this
-            SpeechRecognizer? recognizer = SpeechRecognizer.CreateSpeechRecognizer(Platform.CurrentActivity);
-            if(recognizer == null)
+            if (!SpeechRecognizer.IsRecognitionAvailable(Platform.CurrentActivity))
+            {
+                throw new InvalidOperationException("Speech recognition is not available on this device.");
+            }
+            
+            Recognizer = SpeechRecognizer.CreateSpeechRecognizer(Platform.CurrentActivity);
+            if (Recognizer == null)
             {
                 throw new InvalidOperationException("SpeechRecognizer is not available.");
             }
 
-            recognizer.SetRecognitionListener(new AudioRecogitionListener(Consumer));
-            
-            // ...
+            Recognizer.SetRecognitionListener(new AudioRecogitionListener(WeakConsumer));
+
+            var intent = new Intent(RecognizerIntent.ExtraLanguageModel);
+            intent.PutExtra(RecognizerIntent.LanguageModelFreeForm, true);
+
+            if (AudioRecognizerGuards.IsAtLeastAndroid34)
+            {
+                intent.PutExtra(RecognizerIntent.ExtraRequestWordConfidence, true);
+            }
+
+            Recognizer.StartListening(intent);
+
+            cancellationToken?.Register(() => StopRecording());
         }
 
         public void StopRecording()
-        {
-            throw new NotImplementedException();
+        {            
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                if (Recognizer != null)
+                {
+                    Recognizer.StopListening();
+                    Recognizer.Destroy();
+                    Recognizer.Dispose();
+                }
+
+                Recognizer = null;
+            });
         }
     }
 }

@@ -22,11 +22,19 @@ public partial class AudioRecordingView : ContentView, IAudioRecordingView
         var view = (AudioRecordingView)bindable;
         if (oldValue == newValue) return;
 
-        view.SetupRecorder();
+        if (oldValue is IAudioRecorderConsumer oldConsumer)
+        {
+            view.TearDownRecorder(oldConsumer);
+        }
+
+        if (newValue is IAudioRecorderConsumer newConsumer)
+        {
+            view.SetupRecorder(newConsumer);
+        }        
     }
 
     public static readonly BindableProperty IsRecordingProperty =
-        BindableProperty.Create(nameof(IsRecording), typeof(bool), typeof(AudioRecordingView), false, propertyChanged: IsRecordingPropertyChanged);
+        BindableProperty.Create(nameof(IsRecording), typeof(bool), typeof(AudioRecordingView), false, defaultBindingMode: BindingMode.TwoWay, propertyChanged: IsRecordingPropertyChanged);
     
     public bool IsRecording
     {
@@ -69,10 +77,35 @@ public partial class AudioRecordingView : ContentView, IAudioRecordingView
 		InitializeComponent();        
 	}
 
-    private void SetupRecorder()
+    private void SetupRecorder(IAudioRecorderConsumer consumer)
     {
-        this.Recorder = AudioRecorderFactory.Create(Consumer);
+        this.Recorder = AudioRecorderFactory.Create(consumer);
+        this.Recorder.RecordingStopped += OnRecordingStopped;
+        this.Recorder.RecordingStarted += OnRecordingStarted;
     }
+
+    private void TearDownRecorder(IAudioRecorderConsumer consumer)
+    {
+        if (Recorder != null)
+        {
+            Recorder.StopRecording();
+            this.Recorder.RecordingStopped -= OnRecordingStopped;
+            this.Recorder.RecordingStarted -= OnRecordingStarted;
+            Recorder = null;
+        }
+    }
+
+    private void OnRecordingStopped(object? sender, EventArgs e)
+    {
+        IsRecording = false;
+        RecorderCancellationTokenSource = null;
+    }
+
+    private void OnRecordingStarted(object? sender, EventArgs e)
+    {
+        IsRecording = true;
+    }
+
 
     private async Task StartRecording()
     {

@@ -1,20 +1,22 @@
 ﻿using Android.Content;
 using Android.Speech;
 using Maui.MediaLibrary.Core.Features.Recording.Interfaces;
+using Maui.MediaLibrary.Core.Features.Recording.Platforms.Shared;
 
 namespace Maui.MediaLibrary.Core.Features.Recording.Platforms.Android
 {
-    public class AudioSpeechRecognizer : IAudioRecorder
-    {
-        private WeakReference<IAudioSpeechRecorderConsumer>? WeakConsumer { get; set; }
+    public class AudioSpeechRecognizer : AudioRecorderBase, IAudioRecorder
+    {        
         private SpeechRecognizer? Recognizer { get; set; }
 
-        public AudioSpeechRecognizer(IAudioSpeechRecorderConsumer consumer)
+        private WeakReference<IAudioSpeechRecorderConsumer> WeakSpeechConsumer { get; set; }
+
+        public AudioSpeechRecognizer(IAudioSpeechRecorderConsumer consumer) : base(consumer)
         {
-            this.WeakConsumer = new WeakReference<IAudioSpeechRecorderConsumer>(consumer);
+            WeakSpeechConsumer = new WeakReference<IAudioSpeechRecorderConsumer>(consumer);
         }
 
-        public void StartRecording(CancellationToken? cancellationToken = null)
+        public override void StartRecording(CancellationToken? cancellationToken = null)
         {
             if (Platform.CurrentActivity == null)
             {
@@ -32,7 +34,7 @@ namespace Maui.MediaLibrary.Core.Features.Recording.Platforms.Android
                 throw new InvalidOperationException("SpeechRecognizer is not available.");
             }
 
-            Recognizer.SetRecognitionListener(new AudioRecogitionListener(WeakConsumer));
+            Recognizer.SetRecognitionListener(new AudioRecogitionListener(WeakSpeechConsumer));
 
             var intent = new Intent(RecognizerIntent.ExtraLanguageModel);
             intent.PutExtra(RecognizerIntent.LanguageModelFreeForm, true);
@@ -44,10 +46,12 @@ namespace Maui.MediaLibrary.Core.Features.Recording.Platforms.Android
 
             Recognizer.StartListening(intent);
 
+            base.RaiseRecordingStarted();
+
             cancellationToken?.Register(() => StopRecording());
         }
 
-        public void StopRecording()
+        public override void StopRecording()
         {            
             MainThread.BeginInvokeOnMainThread(() =>
             {
@@ -59,6 +63,8 @@ namespace Maui.MediaLibrary.Core.Features.Recording.Platforms.Android
                 }
 
                 Recognizer = null;
+
+                base.RaiseRecordingStopped();
             });
         }
     }

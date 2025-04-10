@@ -7,7 +7,7 @@ namespace Maui.MediaLibrary.Features.Tests
 {
     public partial class AudioRecorderViewModel : ObservableObject, IAudioSpeechRecorderConsumer
     {
-        [ObservableProperty]
+        [ObservableProperty]        
         public partial bool IsRecording { get; set; }
 
         [ObservableProperty]
@@ -16,7 +16,11 @@ namespace Maui.MediaLibrary.Features.Tests
         [RelayCommand]
         private void StartStopRecording()
         {
-            IsRecording = !IsRecording;
+            IsRecording = !IsRecording;            
+        }
+
+        partial void OnIsRecordingChanged(bool value)
+        {
             RecordingButtonText = IsRecording ? "Stop Recording" : "Start Recording";
         }
 

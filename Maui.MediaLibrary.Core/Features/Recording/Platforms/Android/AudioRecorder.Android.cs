@@ -1,28 +1,26 @@
 ﻿using Android.Media;
 using Maui.MediaLibrary.Core.Features.Recording.Interfaces;
 using Maui.MediaLibrary.Core.Features.Recording.Models;
+using Maui.MediaLibrary.Core.Features.Recording.Platforms.Shared;
 
 
 namespace Maui.MediaLibrary.Core.Features.Recording.Platforms.Android;
 
-internal class AudioRecorder : IAudioRecorder
+internal class AudioRecorder : AudioRecorderBase, IAudioRecorder
 {
     private AudioRecord? AudioRecord { get; set; }
     private int BufferSize;
-    private byte[] Buffer;
-    private WeakReference<IAudioRecorderConsumer>? Consumer { get; set; }
+    private byte[] Buffer;    
 
     public bool IsRecording { get; private set; }
 
-    public AudioRecorder(IAudioRecorderConsumer consumer)
-    {
-        this.Consumer = new WeakReference<IAudioRecorderConsumer>(consumer);
-
+    public AudioRecorder(IAudioRecorderConsumer consumer) : base(consumer)
+    {        
         BufferSize = AudioRecord.GetMinBufferSize(16000, ChannelIn.Mono, Encoding.Pcm16bit);
         Buffer = new byte[BufferSize];
     }
 
-    public void StartRecording(CancellationToken? cancellationToken = null)
+    public override void StartRecording(CancellationToken? cancellationToken = null)
     {        
         cancellationToken ??= CancellationToken.None;
 
@@ -77,7 +75,7 @@ internal class AudioRecorder : IAudioRecorder
 
     private void SubmitAudioChunk(byte[] chunk, double loudness, double freq)
     {
-        if (Consumer != null && Consumer.TryGetTarget(out var consumer))
+        if (WeakConsumer != null && WeakConsumer.TryGetTarget(out var consumer))
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
@@ -162,7 +160,7 @@ internal class AudioRecorder : IAudioRecorder
         }
     }
 
-    public void StopRecording()
+    public override void StopRecording()
     {
         if(!IsRecording)
         {
